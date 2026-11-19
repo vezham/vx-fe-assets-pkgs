@@ -5,9 +5,9 @@ const { execFileSync } = require('child_process')
 const { loadIconData } = require('../../icons-data/icon-source.cjs')
 
 const ROOT = path.join(__dirname, '..')
-const TEMPLATE_HTML_PATH = path.join(__dirname, '..', 'src', 'ui.html')
+const TEMPLATE_HTML_PATH = path.join(ROOT, 'src', 'index.html')
 const DIST = path.join(ROOT, 'dist')
-const OUTPUT_HTML_PATH = path.join(DIST, 'ui.html')
+const OUTPUT_HTML_PATH = path.join(DIST, 'index.html')
 const LOGO_PATH = path.join(ROOT, 'icon-light.webp')
 
 console.log('Building Vezham Figma plugin package...')
@@ -122,7 +122,7 @@ try {
     bugs: srcPkg.bugs,
     homepage: srcPkg.homepage,
     main: 'code.js',
-    files: ['code.js', 'ui.html', 'manifest.json', 'icon.png'],
+    files: ['code.js', 'index.html', 'manifest.json', 'icon.png'],
     author: srcPkg.author,
     license: srcPkg.license
   }

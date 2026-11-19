@@ -93,7 +93,7 @@ class VezhamIconsWebviewViewProvider {
   }
 
   _getHtmlForWebview() {
-    const htmlPath = path.join(this._extensionUri.fsPath, 'dist', 'ui.html')
+    const htmlPath = path.join(this._extensionUri.fsPath, 'dist', 'index.html')
     if (!fs.existsSync(htmlPath)) {
       return `
                 <!DOCTYPE html>

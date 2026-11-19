@@ -3,12 +3,12 @@ const fs = require('fs')
 const path = require('path')
 const { loadIconData } = require('../../icons-data/icon-source.cjs')
 
-const TEMPLATE_HTML_PATH = path.join(__dirname, '..', 'src', 'ui.html')
-const OUTPUT_HTML_PATH = path.join(__dirname, '..', 'dist', 'ui.html')
+const TEMPLATE_HTML_PATH = path.join(__dirname, '..', 'src', 'index.html')
+const OUTPUT_HTML_PATH = path.join(__dirname, '..', 'dist', 'index.html')
 const LOGO_PATH = path.join(__dirname, '..', 'resources', 'icon.png')
 
 console.log(
-  'Compiling Vezham Icons VS Code icons database and inlining into ui.html...'
+  'Compiling Vezham Icons VS Code icons database and inlining into index.html...'
 )
 
 try {
@@ -93,6 +93,7 @@ try {
   }
 
   fs.writeFileSync(OUTPUT_HTML_PATH, templateContent, 'utf-8')
+  fs.rmSync(path.join(outputDir, 'ui.html'), { force: true })
   console.log(
     `Successfully compiled ${Object.keys(compactData).length} icons directly into ${OUTPUT_HTML_PATH}`
   )
