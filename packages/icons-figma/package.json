@@ -1,0 +1,32 @@
+{
+  "name": "@vezham/icons-figma",
+  "version": "1.0.7",
+  "description": "Your Figma Plugin",
+  "homepage": "https://vezham.com",
+  "bugs": {
+    "url": "https://github.com/vezham/vx-fe-assets-pkgs/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vezham/vx-fe-assets-pkgs",
+    "directory": "packages/icons-figma"
+  },
+  "main": "./dist/code.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "watch": "npm run build -- --watch"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@figma/eslint-plugin-figma-plugins": "*",
+    "@figma/plugin-typings": "*",
+    "eslint": "^9.39.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1"
+  }
+}

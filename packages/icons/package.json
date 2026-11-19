@@ -1,0 +1,64 @@
+{
+  "name": "@vezham/icons",
+  "version": "1.0.7",
+  "description": "Vanilla JS core icon package for Vezham.",
+  "keywords": [
+    "filled",
+    "icon-library",
+    "icons",
+    "outline",
+    "svg-icons",
+    "tree-shakeable",
+    "typescript",
+    "vanilla-js"
+  ],
+  "homepage": "https://vezham.com",
+  "bugs": {
+    "url": "https://github.com/vezham/vx-fe-assets-pkgs/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vezham/vx-fe-assets-pkgs",
+    "directory": "packages/icons"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/icons/*.d.ts",
+      "import": "./dist/icons/*.js"
+    },
+    "./createIcon": {
+      "types": "./dist/createIcon.d.ts",
+      "import": "./dist/createIcon.js"
+    },
+    "./umd/vezham-icons.js": {
+      "import": "./dist/umd/vezham-icons.js"
+    },
+    "./cdn/vezham-icons.js": {
+      "import": "./dist/cdn/vezham-icons.js"
+    },
+    "./cdn/icons/*": {
+      "default": "./dist/cdn/icons/*"
+    },
+    "./cdn/*": {
+      "import": "./dist/cdn/*.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "jsdelivr": "./dist/umd/vezham-icons.js",
+  "unpkg": "./dist/umd/vezham-icons.js",
+  "module": "./dist/index.js",
+  "browser": "./dist/umd/vezham-icons.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.cjs"
+  }
+}

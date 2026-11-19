@@ -1,0 +1,57 @@
+{
+  "name": "@vezham/icons-vue",
+  "version": "1.0.7",
+  "description": "Vue icon components for Vezham.",
+  "keywords": [
+    "filled",
+    "icon-library",
+    "icons",
+    "outline",
+    "svg-icons",
+    "tree-shakeable",
+    "typescript",
+    "vue",
+    "vue-icons",
+    "vue3"
+  ],
+  "homepage": "https://vezham.com",
+  "bugs": {
+    "url": "https://github.com/vezham/vx-fe-assets-pkgs/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vezham/vx-fe-assets-pkgs",
+    "directory": "packages/icons-vue"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./icons/*": {
+      "types": "./dist/icons/*.d.ts",
+      "import": "./dist/icons/*.js"
+    },
+    "./createIcon": {
+      "types": "./dist/createIcon.d.ts",
+      "import": "./dist/createIcon.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.cjs"
+  },
+  "devDependencies": {
+    "vue": "^3.0.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  }
+}

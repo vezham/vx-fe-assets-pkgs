@@ -1,0 +1,58 @@
+{
+  "name": "@vezham/icons-react-native",
+  "version": "1.0.7",
+  "description": "React Native icon components for Vezham.",
+  "keywords": [
+    "android",
+    "filled",
+    "icon-library",
+    "icons",
+    "ios",
+    "mobile",
+    "outline",
+    "react-native",
+    "react-native-icons",
+    "svg-icons",
+    "tree-shakeable",
+    "typescript"
+  ],
+  "homepage": "https://vezham.com",
+  "bugs": {
+    "url": "https://github.com/vezham/vx-fe-assets-pkgs/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vezham/vx-fe-assets-pkgs",
+    "directory": "packages/icons-react-native"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./icons/*": {
+      "types": "./dist/icons/*.d.ts",
+      "import": "./dist/icons/*.js"
+    },
+    "./createIcon": {
+      "types": "./dist/createIcon.d.ts",
+      "import": "./dist/createIcon.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.cjs"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-native": ">=0.64.0",
+    "react-native-svg": ">=12.0.0"
+  }
+}

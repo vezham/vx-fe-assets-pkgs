@@ -32,7 +32,8 @@ const ignores = [
   '**/routeTree.gen.ts',
   '**/src/generated/**',
   '**/vite.config.*.timestamp*',
-  '**/vitest.config.*.timestamp*'
+  '**/vitest.config.*.timestamp*',
+  'packages/icons-data/icons/**'
 ]
 
 const vxLintIgnores = [
@@ -133,6 +134,21 @@ export default [
     files: ['**/src/**/*.{ts,tsx,js,jsx,mts,cts}'],
     ignores: vxLintIgnores,
     rules: { '@vx-lint/props-name': 'error' }
+  },
+  {
+    // vx-bot/NOTE: Preserve the imported icon implementation's comments and function declarations.
+    basePath: fileURLToPath(new URL('.', import.meta.url)),
+    files: ['packages/icons{,-*}/**/*.{js,cjs,ts}'],
+    rules: {
+      '@vx-lint/arrow-functions': 'off',
+      '@vx-lint/comment-style': 'off'
+    }
+  },
+  {
+    // vx-bot/NOTE: The published createIcon subpaths expose a default export.
+    basePath: fileURLToPath(new URL('.', import.meta.url)),
+    files: ['packages/icons{,-*}/src/createIcon.js'],
+    rules: { '@vx-lint/named-exports': 'off' }
   },
   {
     files: [

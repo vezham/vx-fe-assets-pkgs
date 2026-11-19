@@ -1,0 +1,92 @@
+{
+  "name": "@vezham/icons-vscode",
+  "displayName": "Vezham Icons — Open Source SVG Icon Library",
+  "version": "1.0.7",
+  "description": "Browse and insert handcrafted Vezham SVG icons directly into your HTML, React, Vue, Svelte, or vanilla JS code. Outline, filled, duotone-outline, and duotone-filled styles available.",
+  "categories": [
+    "Other",
+    "Snippets"
+  ],
+  "keywords": [
+    "duotone icons",
+    "filled icons",
+    "heroicons",
+    "icon browser",
+    "icon picker",
+    "icons",
+    "lucide",
+    "outline icons",
+    "react-icons",
+    "svelte-icons",
+    "svg",
+    "vue-icons"
+  ],
+  "homepage": "https://vezham.com",
+  "bugs": {
+    "url": "https://github.com/vezham/vx-fe-assets-pkgs/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vezham/vx-fe-assets-pkgs",
+    "directory": "packages/icons-vscode"
+  },
+  "main": "./extension.js",
+  "files": [
+    "dist",
+    "extension.js",
+    "resources"
+  ],
+  "scripts": {
+    "build": "node scripts/build.cjs"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "vezham-icons.focusExplorer",
+        "title": "Focus on Vezham Icons"
+      }
+    ],
+    "views": {
+      "vezham-icons-explorer": [
+        {
+          "type": "webview",
+          "id": "vezham-icons.views.explorer",
+          "name": "Vezham Icons"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vezham-icons-explorer",
+          "title": "Vezham Icons",
+          "icon": "resources/icon.png"
+        }
+      ]
+    }
+  },
+  "activationEvents": [],
+  "devDependencies": {
+    "@types/vscode": "^1.80.0"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "icon": "resources/icon.png",
+  "badges": [
+    {
+      "description": "2,700+ Icons",
+      "url": "https://img.shields.io/badge/icons-2,700%2B-blue",
+      "href": "https://vezham.com"
+    },
+    {
+      "description": "MIT License",
+      "url": "https://img.shields.io/badge/license-MIT-6C5CE7",
+      "href": "https://github.com/vezham/vx-fe-assets-pkgs/blob/main/LICENSE"
+    }
+  ],
+  "galleryBanner": {
+    "color": "#09090b",
+    "theme": "dark"
+  }
+}

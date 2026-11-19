@@ -4,6 +4,7 @@
 # /.changelog
 
 .vezham
+packages/icons-data/icons/**
 
 # MDX content
 # **/content/**/*.mdx

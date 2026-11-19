@@ -1,0 +1,102 @@
+#!/usr/bin/env node
+const fs = require('fs')
+const path = require('path')
+const { loadIconData } = require('../../icons-data/icon-source.cjs')
+
+const TEMPLATE_HTML_PATH = path.join(__dirname, '..', 'src', 'ui.html')
+const OUTPUT_HTML_PATH = path.join(__dirname, '..', 'dist', 'ui.html')
+const LOGO_PATH = path.join(__dirname, '..', 'resources', 'icon.png')
+
+console.log(
+  'Compiling Vezham Icons VS Code icons database and inlining into ui.html...'
+)
+
+try {
+  if (!fs.existsSync(TEMPLATE_HTML_PATH)) {
+    throw new Error(`Template HTML file not found at ${TEMPLATE_HTML_PATH}`)
+  }
+
+  const rawData = loadIconData()
+  const compactData = {}
+  const categoriesList = []
+
+  if (rawData.categories) {
+    for (const [catKey, catData] of Object.entries(rawData.categories)) {
+      categoriesList.push({
+        id: catKey,
+        name: catData.name || catKey.charAt(0).toUpperCase() + catKey.slice(1)
+      })
+
+      for (const [iconKey, icon] of Object.entries(catData.icons || {})) {
+        const weights = {}
+        for (const [weightName, weightData] of Object.entries(
+          icon.weights || {}
+        )) {
+          if (weightData && weightData.code) {
+            weights[weightName] = weightData.code
+          }
+        }
+
+        // Only include icon if it has at least one weight
+        if (Object.keys(weights).length > 0) {
+          compactData[iconKey] = {
+            category: catKey,
+            weights: weights,
+            description: icon.description || []
+          }
+        }
+      }
+    }
+  }
+
+  // Load logo as base64
+  let logoBase64 = ''
+  if (fs.existsSync(LOGO_PATH)) {
+    const logoBuffer = fs.readFileSync(LOGO_PATH)
+    logoBase64 = `data:image/png;base64,${logoBuffer.toString('base64')}`
+  }
+
+  // Read the HTML template
+  let templateContent = fs.readFileSync(TEMPLATE_HTML_PATH, 'utf-8')
+
+  // Replace placeholders
+  templateContent = templateContent.replace(
+    /__VEZHAM_ICONS_LOGO_BASE64__/g,
+    logoBase64
+  )
+
+  // Create inline scripts
+  const inlineScripts = `
+  <script>
+    window.VEZHAM_ICONS_DATA = ${JSON.stringify(compactData)};
+    window.VEZHAM_ICONS_CATEGORIES = ${JSON.stringify(categoriesList)};
+  </script>
+  `
+
+  // Inject before the closing </head> or at placeholder
+  if (templateContent.includes('<!-- INJECT_ICONS_DATA -->')) {
+    templateContent = templateContent.replace(
+      '<!-- INJECT_ICONS_DATA -->',
+      inlineScripts
+    )
+  } else {
+    templateContent = templateContent.replace(
+      '</head>',
+      `${inlineScripts}\n</head>`
+    )
+  }
+
+  // Ensure output directory exists
+  const outputDir = path.dirname(OUTPUT_HTML_PATH)
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true })
+  }
+
+  fs.writeFileSync(OUTPUT_HTML_PATH, templateContent, 'utf-8')
+  console.log(
+    `Successfully compiled ${Object.keys(compactData).length} icons directly into ${OUTPUT_HTML_PATH}`
+  )
+} catch (error) {
+  console.error('Error compiling VS Code extension UI:', error)
+  process.exit(1)
+}

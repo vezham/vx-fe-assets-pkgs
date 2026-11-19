@@ -1,0 +1,21 @@
+{
+  "name": "icons-react",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/icons-react/src",
+  "projectType": "library",
+  "tags": ["scope:icons"],
+  "targets": {
+    "build": {
+      "cache": true,
+      "inputs": ["default", "iconCatalog"],
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p tsconfig.json --noEmit",
+        "cwd": "{projectRoot}"
+      }
+    }
+  }
+}

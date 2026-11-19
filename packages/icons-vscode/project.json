@@ -1,0 +1,14 @@
+{
+  "name": "icons-vscode",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/icons-vscode/src",
+  "projectType": "library",
+  "tags": ["scope:icons"],
+  "targets": {
+    "build": {
+      "cache": true,
+      "inputs": ["default", "iconCatalog"],
+      "outputs": ["{projectRoot}/dist"]
+    }
+  }
+}
