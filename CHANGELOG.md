@@ -1,3 +1,14 @@
+## 27.0.3 (2026-11-20)
+
+### 🩹 Fixes
+
+- **icons:** align package export paths ([1d26dedd](https://github.com/vezham/vx-fe-assets-pkgs/commit/1d26dedd))
+- **icons:** improve rendering and packaging ([d4141f45](https://github.com/vezham/vx-fe-assets-pkgs/commit/d4141f45))
+
+### ❤️ Thank You
+
+- vx-vigneshwaran
+
 ## 27.0.2 (2026-11-20)
 
 ### 🩹 Fixes
