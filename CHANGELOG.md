@@ -1,3 +1,23 @@
+## 27.0.1 (2026-11-20)
+
+### 🩹 Fixes
+
+- **icons:** rename plugin UI entrypoints ([ada99fef](https://github.com/vezham/vx-fe-assets-pkgs/commit/ada99fef))
+- **icons:** escape embedded script data ([705a45d1](https://github.com/vezham/vx-fe-assets-pkgs/commit/705a45d1))
+
+### 💅 Refactors
+
+- **icons:** share build helpers ([3e13d890](https://github.com/vezham/vx-fe-assets-pkgs/commit/3e13d890))
+- **icons:** centralize shared icon logic ([761a54be](https://github.com/vezham/vx-fe-assets-pkgs/commit/761a54be))
+
+### 🏡 Chore
+
+- **repo:** mig old impl ([3ca79026](https://github.com/vezham/vx-fe-assets-pkgs/commit/3ca79026))
+
+### ❤️ Thank You
+
+- vx-vigneshwaran
+
 ## 26.27.0 (2026-11-15)
 
 ### 🚀 Features
