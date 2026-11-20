@@ -33,12 +33,7 @@
       "svelte": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./icons/*.svelte": {
-      "types": "./dist/icons/*.svelte.d.ts",
-      "svelte": "./dist/icons/*.svelte",
-      "default": "./dist/icons/*.svelte"
-    },
-    "./icons/*": {
+    "./*": {
       "types": "./dist/icons/*.svelte.d.ts",
       "svelte": "./dist/icons/*.svelte",
       "default": "./dist/icons/*.svelte"

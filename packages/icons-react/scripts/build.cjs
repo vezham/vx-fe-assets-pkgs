@@ -16,6 +16,7 @@ buildFactoryPackage(path.join(__dirname, '..'), {
   description: 'Vezham SVG icon component, renders SVG Element with children.',
   attrs: 'SVG attribute',
   client: true,
+  esmTypes: true,
   keywords: [
     'icons',
     'react',

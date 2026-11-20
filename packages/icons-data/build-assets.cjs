@@ -176,11 +176,12 @@ const writeFactoryIcons = (
     client,
     secondaryColor,
     vanilla,
+    esmTypes = vanilla,
     runtimeFiles = factoryRuntime
   }
 ) => {
   const type = vanilla ? 'IconFunction' : 'IconComponent'
-  const declarationImport = vanilla ? '../createIcon.js' : '../createIcon'
+  const declarationImport = esmTypes ? '../createIcon.js' : '../createIcon'
   for (const { pascal, kebab, weights } of icons) {
     const preview = buildPreviewDataUri(weights, secondaryColor)
     const help = [
@@ -204,7 +205,7 @@ const writeFactoryIcons = (
             ]
           : attrs
             ? [
-                ` * @param {import('../createIcon').IconProps} props — Vezham icon props and any valid ${attrs}`,
+                ` * @param {import('${declaration ? declarationImport : '../createIcon'}').IconProps} props — Vezham icon props and any valid ${attrs}`,
                 ' * @returns {JSX.Element} JSX Element'
               ]
             : []),
@@ -222,12 +223,15 @@ const writeFactoryIcons = (
     )
     fs.writeFileSync(
       path.join(dist, 'icons', pascal + '.d.ts'),
-      `import${vanilla ? ' type' : ''} { ${type} } from '${declarationImport}';\n\n${docs(true)}\ndeclare const ${pascal}: ${type};\n${exports}`
+      `import${esmTypes ? ' type' : ''} { ${type} } from '${declarationImport}';\n\n${docs(true)}\ndeclare const ${pascal}: ${type};\n${exports}`
     )
   }
 
-  const types = vanilla
-    ? "export { createIcon } from './createIcon.js';\nexport type { IconOptions, IconWeight, IconFunction } from './createIcon.js';"
+  const typeExports = vanilla
+    ? 'IconOptions, IconWeight, IconFunction'
+    : 'IconProps, IconWeight, IconComponent'
+  const types = esmTypes
+    ? `export { createIcon } from './createIcon.js';\nexport type { ${typeExports} } from './createIcon.js';`
     : "export { createIcon, IconProps, IconWeight, IconComponent } from './createIcon';"
   writeIconEntries(dist, src, icons, { types, runtimeFiles })
 }
@@ -269,6 +273,19 @@ const finishBuild = (dist, icons, totalFiles, publishPath = 'dist') => {
   )
 }
 
+const distExports = sourceExports =>
+  Object.fromEntries(
+    Object.entries(sourceExports).map(([subpath, conditions]) => [
+      subpath,
+      Object.fromEntries(
+        Object.entries(conditions).map(([condition, target]) => [
+          condition,
+          target.replace(/^\.\/dist\//, './')
+        ])
+      )
+    ])
+  )
+
 const buildFactoryPackage = (root, options) => {
   const {
     title,
@@ -282,19 +299,17 @@ const buildFactoryPackage = (root, options) => {
     `Generating ${title === 'Vue 3' ? 'Vue' : title} component files in dist/icons/ …`
   )
   writeFactoryIcons(dist, path.join(root, 'src'), icons, options)
-  const { dependencies, peerDependencies } = JSON.parse(
-    fs.readFileSync(path.join(root, 'package.json'), 'utf8')
-  )
+  const {
+    dependencies,
+    peerDependencies,
+    exports: sourceExports
+  } = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
   writePackageJson(root, dist, {
     description: `${title} icon components for ${icons.length}+ icons in 4 weights. Tree-shakeable, TypeScript-ready.`,
     main: './index.js',
     module: './index.js',
     types: './index.d.ts',
-    exports: {
-      '.': { import: './index.js', types: './index.d.ts' },
-      './icons/*': { import: './icons/*.js', types: './icons/*.d.ts' },
-      './createIcon': { import: './createIcon.js', types: './createIcon.d.ts' }
-    },
+    exports: distExports(sourceExports),
     sideEffects: false,
     files: ['index.js', 'index.d.ts', ...runtimeFiles, 'icons/'],
     dependencies,
@@ -312,6 +327,7 @@ const buildFactoryPackage = (root, options) => {
 module.exports = {
   buildFactoryPackage,
   buildPreviewDataUri,
+  distExports,
   escapeForJS,
   finishBuild,
   prepareBuild,

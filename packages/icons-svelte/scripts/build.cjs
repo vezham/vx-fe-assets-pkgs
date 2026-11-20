@@ -12,6 +12,7 @@ const fs = require('fs')
 const path = require('path')
 const {
   buildPreviewDataUri,
+  distExports,
   finishBuild,
   prepareBuild,
   writeIconEntries,
@@ -19,8 +20,9 @@ const {
 } = require('../../icons-data/build-assets.cjs')
 
 // ── paths ──────────────────────────────────────────────────────────────────
-const SRC = path.join(__dirname, '..', 'src')
-const DIST = path.join(__dirname, '..', 'dist')
+const ROOT = path.join(__dirname, '..')
+const SRC = path.join(ROOT, 'src')
+const DIST = path.join(ROOT, 'dist')
 
 function escapeForJS(s) {
   return s
@@ -83,7 +85,7 @@ ${wEntries}
 
   // ── icon .svelte.d.ts file ──
   const iconDTS = `import { SvelteComponent } from 'svelte';
-import { IconProps } from '../index';
+import type { IconProps } from '../index.js';
 
 /**
  * @component
@@ -127,34 +129,16 @@ writeIconEntries(DIST, SRC, icons, {
 })
 
 // ── package.json ───────────────────────────────────────────────────────────
-writePackageJson(path.join(__dirname, '..'), DIST, {
+const sourcePackage = JSON.parse(
+  fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')
+)
+writePackageJson(ROOT, DIST, {
   description: `Svelte icon components for ${icons.length}+ icons in 4 weights. Tree-shakeable, TypeScript-ready.`,
   main: './index.js',
   module: './index.js',
   svelte: './index.js',
   types: './index.d.ts',
-  exports: {
-    '.': {
-      types: './index.d.ts',
-      svelte: './index.js',
-      default: './index.js'
-    },
-    './icons/*.svelte': {
-      types: './icons/*.svelte.d.ts',
-      svelte: './icons/*.svelte',
-      default: './icons/*.svelte'
-    },
-    './icons/*': {
-      types: './icons/*.svelte.d.ts',
-      svelte: './icons/*.svelte',
-      default: './icons/*.svelte'
-    },
-    './Icon.svelte': {
-      types: './Icon.svelte.d.ts',
-      svelte: './Icon.svelte',
-      default: './Icon.svelte'
-    }
-  },
+  exports: distExports(sourcePackage.exports),
   sideEffects: false,
   files: [
     'index.js',

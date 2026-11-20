@@ -13,6 +13,7 @@ const { buildFactoryPackage } = require('../../icons-data/build-assets.cjs')
 
 buildFactoryPackage(path.join(__dirname, '..'), {
   title: 'Vue 3',
+  esmTypes: true,
   description: 'Vezham Vue icon component, renders an SVG Element.',
   secondaryColor: false,
   keywords: [

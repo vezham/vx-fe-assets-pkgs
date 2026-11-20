@@ -13,6 +13,7 @@ const { buildFactoryPackage } = require('../../icons-data/build-assets.cjs')
 
 buildFactoryPackage(path.join(__dirname, '..'), {
   title: 'React Native',
+  esmTypes: true,
   description: 'Vezham React Native SVG icon component',
   attrs: 'react-native-svg props',
   keywords: [
