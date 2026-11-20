@@ -1,11 +1,35 @@
-import { createElement, forwardRef } from 'react'
-import { SvgXml } from 'react-native-svg'
+import { createElement, forwardRef, useMemo } from 'react'
+import { SvgAst, parse } from 'react-native-svg'
 
-const W_MAP = {
-  outline: 'O',
-  filled: 'F',
-  'duotone-outline': 'DO',
-  'duotone-filled': 'DF'
+import {
+  isSecondarySvgLayer,
+  resolveIconMarkup
+} from '../../icons-data/svg-rendering.mjs'
+
+/**
+ * @param {import('react-native-svg').XmlAST} element
+ * @param {Pick<import('./createIcon').IconProps, 'color' | 'secondaryColor' | 'strokeWidth'>} options
+ * @param {boolean} [secondaryLayer]
+ */
+const applySvgPaint = (element, options, secondaryLayer = false) => {
+  const { props } = element
+  const { color, secondaryColor, strokeWidth } = options
+  const tintLayer =
+    secondaryColor != null && (secondaryLayer || isSecondarySvgLayer(props))
+  const paint = tintLayer ? secondaryColor : color
+  if (paint != null) {
+    if (props.fill === 'currentColor') props.fill = paint
+    if (props.stroke === 'currentColor') props.stroke = paint
+  }
+  if (color != null && props.stopColor === 'currentColor')
+    props.stopColor = color
+  if (strokeWidth != null && props.strokeWidth !== undefined) {
+    props.strokeWidth = String(strokeWidth)
+  }
+  for (const child of element.children) {
+    if (typeof child !== 'string') applySvgPaint(child, options, tintLayer)
+  }
+  return element
 }
 
 /**
@@ -31,34 +55,26 @@ const createIcon = (displayName, iconData) => {
       },
       ref
     ) => {
-      const key = W_MAP[weight] || 'O'
-      let html = iconData[key] || iconData[Object.keys(iconData)[0]] || ''
-
-      if (strokeWidth != null) {
-        html = html.replace(
-          /stroke-width="[^"]*"/g,
-          `stroke-width="${strokeWidth}"`
-        )
-      }
-
-      if (color != null) {
-        html = html.replace(/currentColor/g, color)
-      }
-
-      // Replace secondary color placeholder if present
-      if (secondaryColor) {
-        html = html.replace(/__RI_SECONDARY__/g, secondaryColor)
-      }
-
-      const svgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none">${html}</svg>`
-
-      return createElement(SvgXml, {
-        ref,
-        xml: svgMarkup,
-        width: size,
-        height: size,
-        style,
-        ...rest
+      const { markup, isDuotone } = resolveIconMarkup(iconData, weight)
+      const duotoneColor = isDuotone ? secondaryColor : undefined
+      const ast = useMemo(() => {
+        const xml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">${markup}</svg>`
+        try {
+          return parse(xml, element =>
+            applySvgPaint(element, {
+              color,
+              secondaryColor: duotoneColor,
+              strokeWidth
+            })
+          )
+        } catch (error) {
+          console.error(error)
+          return null
+        }
+      }, [markup, color, duotoneColor, strokeWidth])
+      return createElement(SvgAst, {
+        ast,
+        override: { ref, width: size, height: size, style, ...rest }
       })
     }
   )

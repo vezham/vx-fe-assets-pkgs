@@ -8,7 +8,18 @@ const JsVersionActions = jsRelease.default ?? jsRelease
 class VxVersionActions extends JsVersionActions {
   async updateProjectVersion(tree, newVersion) {
     const logMessages = await super.updateProjectVersion(tree, newVersion)
-    const vxConfigPath = join(this.projectGraphNode.data.root, 'vx.app.yaml')
+    const { root, tags } = this.projectGraphNode.data
+    const distManifestPath = join(root, 'dist', 'package.json')
+    if (tags?.includes('scope:icons') && tree.exists(distManifestPath)) {
+      this.updateManifestValues(tree, distManifestPath, [
+        { path: ['version'], value: newVersion }
+      ])
+      logMessages.push(
+        `✍️  New version ${newVersion} written to manifest: ${distManifestPath}`
+      )
+    }
+
+    const vxConfigPath = join(root, 'vx.app.yaml')
 
     if (!tree.exists(vxConfigPath)) {
       return logMessages

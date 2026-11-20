@@ -3,9 +3,10 @@ const fs = require('fs')
 const path = require('path')
 const { renderWebview } = require('../../icons-data/build-assets.cjs')
 
-const TEMPLATE_HTML_PATH = path.join(__dirname, '..', 'src', 'index.html')
-const OUTPUT_HTML_PATH = path.join(__dirname, '..', 'dist', 'index.html')
-const LOGO_PATH = path.join(__dirname, '..', 'resources', 'icon.png')
+const ROOT = path.join(__dirname, '..')
+const DIST = path.join(ROOT, 'dist')
+const TEMPLATE_HTML_PATH = path.join(ROOT, 'src', 'index.html')
+const LOGO_PATH = path.join(ROOT, 'resources', 'icon.png')
 
 console.log(
   'Compiling Vezham Icons VS Code icons database and inlining into index.html...'
@@ -22,16 +23,31 @@ try {
     'image/png'
   )
 
-  // Ensure output directory exists
-  const outputDir = path.dirname(OUTPUT_HTML_PATH)
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true })
-  }
+  fs.rmSync(DIST, { recursive: true, force: true })
+  fs.mkdirSync(DIST, { recursive: true })
+  fs.writeFileSync(path.join(DIST, 'index.html'), html, 'utf-8')
+  fs.copyFileSync(
+    path.join(ROOT, 'extension.js'),
+    path.join(DIST, 'extension.js')
+  )
+  fs.copyFileSync(LOGO_PATH, path.join(DIST, 'icon.png'))
 
-  fs.writeFileSync(OUTPUT_HTML_PATH, html, 'utf-8')
-  fs.rmSync(path.join(outputDir, 'ui.html'), { force: true })
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(ROOT, 'package.json'), 'utf-8')
+  )
+  manifest.name = 'icons'
+  manifest.main = './extension.js'
+  manifest.icon = 'icon.png'
+  manifest.contributes.viewsContainers.activitybar[0].icon = manifest.icon
+  manifest.files = ['extension.js', 'icon.png', 'index.html']
+  delete manifest.scripts
+  delete manifest.devDependencies
+  fs.writeFileSync(
+    path.join(DIST, 'package.json'),
+    JSON.stringify(manifest, null, 2) + '\n'
+  )
   console.log(
-    `Successfully compiled ${iconCount} icons directly into ${OUTPUT_HTML_PATH}`
+    `Successfully built ${manifest.publisher}.${manifest.name} with ${iconCount} icons into ${DIST}`
   )
 } catch (error) {
   console.error('Error compiling VS Code extension UI:', error)

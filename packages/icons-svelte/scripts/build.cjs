@@ -120,7 +120,7 @@ export interface IconProps {
 
 export declare class Icon extends SvelteComponent<IconProps, any, any> {}
 `
-writeIconEntries(DIST, SRC, icons, {
+const runtimeFiles = writeIconEntries(DIST, SRC, icons, {
   runtime: "export { default as Icon } from './Icon.svelte';",
   types: types.trimEnd(),
   exportName: icon => `default as ${icon.pascal}`,
@@ -140,13 +140,7 @@ writePackageJson(ROOT, DIST, {
   types: './index.d.ts',
   exports: distExports(sourcePackage.exports),
   sideEffects: false,
-  files: [
-    'index.js',
-    'index.d.ts',
-    'Icon.svelte',
-    'Icon.svelte.d.ts',
-    'icons/'
-  ],
+  files: ['index.js', 'index.d.ts', ...runtimeFiles, 'icons/'],
   peerDependencies: {
     svelte: '>=3.0.0'
   },

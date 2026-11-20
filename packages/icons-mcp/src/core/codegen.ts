@@ -29,17 +29,18 @@ function colorProp(
   color: string,
   framework: ApplyIconInput['framework']
 ): string {
-  if (framework === 'vue') return ` color="${color}"`
-  if (framework === 'html') return ` color="${color}"`
   if (
     framework === 'svelte' ||
     framework === 'react' ||
     framework === 'react-native'
   ) {
-    const val = color === 'currentColor' ? 'currentColor' : `"${color}"`
-    return ` color={${val}}`
+    return ` color={${JSON.stringify(color)}}`
   }
-  return ` color="${color}"`
+  const escaped = color
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+  return ` color="${escaped}"`
 }
 
 export function generateCode(
@@ -61,41 +62,20 @@ export function generateCode(
     hasColor ? colorProp(color, framework) : ''
 
   switch (input.framework) {
-    case 'react': {
-      const importStatement = `import { ${component} } from '@vezham/icons-react';`
-      const props = [
-        sizeProp(size, 'react'),
-        colorAttr('react'),
-        weightProp(weight)
-      ].join('')
-      const docsSnippet = `<${component}${props} />`
-      return { importStatement, docsSnippet }
-    }
-    case 'react-native': {
-      const importStatement = `import { ${component} } from '@vezham/icons-react-native';`
-      const props = [
-        sizeProp(size, 'react-native'),
-        colorAttr('react-native'),
-        weightProp(weight)
-      ].join('')
-      const docsSnippet = `<${component}${props} />`
-      return { importStatement, docsSnippet }
-    }
-    case 'vue': {
-      const importStatement = `import { ${component} } from '@vezham/icons-vue';`
-      const props = [
-        sizeProp(size, 'vue'),
-        colorAttr('vue'),
-        weightProp(weight)
-      ].join('')
-      const docsSnippet = `<${component}${props} />`
-      return { importStatement, docsSnippet }
-    }
+    case 'react':
+    case 'react-native':
+    case 'vue':
     case 'svelte': {
-      const importStatement = `import { ${component} } from '@vezham/icons-svelte';`
+      const framework = input.framework
+      if (!/^[A-Z_$][\w$]*$/.test(component)) {
+        return {
+          error: 'Component names must be valid JSX component identifiers.'
+        }
+      }
+      const importStatement = `import ${component} from '@vezham/icons-${framework}/${icon.pascal}';`
       const props = [
-        sizeProp(size, 'svelte'),
-        colorAttr('svelte'),
+        sizeProp(size, framework),
+        colorAttr(framework),
         weightProp(weight)
       ].join('')
       const docsSnippet = `<${component}${props} />`

@@ -184,7 +184,11 @@ export default [
         'error',
         {
           enforceBuildableLibDependency: true,
-          allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
+          allow: [
+            '^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$',
+            // vx-bot/NOTE: The icon generators copy this shared module into each package.
+            '^\\.\\./\\.\\./icons-data/svg-rendering\\.mjs$'
+          ],
           depConstraints: [
             {
               sourceTag: '*',

@@ -1,14 +1,8 @@
 'use client'
 import { createElement, forwardRef } from 'react'
 
+import { resolveIconMarkup } from '../../icons-data/svg-rendering.mjs'
 import { parseSvgElements, renderSvgElements } from './svg-elements.js'
-
-const W_MAP = {
-  outline: 'O',
-  filled: 'F',
-  'duotone-outline': 'DO',
-  'duotone-filled': 'DF'
-}
 
 /**
  * Factory that builds a forwardRef icon component.
@@ -26,6 +20,7 @@ const createIcon = (displayName, iconData) => {
     (
       {
         color,
+        secondaryColor,
         size = 24,
         weight = 'outline',
         strokeWidth,
@@ -35,10 +30,8 @@ const createIcon = (displayName, iconData) => {
       },
       ref
     ) => {
-      delete rest.secondaryColor
       delete rest.dangerouslySetInnerHTML
-      const key = W_MAP[weight] || 'O'
-      const markup = iconData[key] || iconData[Object.keys(iconData)[0]] || ''
+      const { markup, isDuotone } = resolveIconMarkup(iconData, weight)
       let elements = parsedIcons.get(markup)
       if (!elements) {
         elements = parseSvgElements(markup)
@@ -58,7 +51,11 @@ const createIcon = (displayName, iconData) => {
           style: color != null ? { color, ...style } : style,
           ...rest
         },
-        renderSvgElements(elements, strokeWidth)
+        renderSvgElements(
+          elements,
+          strokeWidth,
+          isDuotone ? secondaryColor : undefined
+        )
       )
     }
   )

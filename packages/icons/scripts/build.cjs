@@ -79,7 +79,7 @@ const umdBundle = `(function (global, factory) {
       var html = iconData[key] || iconData[Object.keys(iconData)[0]] || '';
 
       if (strokeWidth != null) {
-        html = html.replace(/stroke-width="[^"]*"/g, 'stroke-width="' + strokeWidth + '"');
+        html = html.replace(/stroke-width="[^"]*"/g, function () { return 'stroke-width="' + escAttr(strokeWidth) + '"'; });
       }
 
       if (typeof document === 'undefined') {
@@ -123,7 +123,7 @@ const umdBundle = `(function (global, factory) {
       var html = iconData[key] || iconData[Object.keys(iconData)[0]] || '';
 
       if (strokeWidth != null) {
-        html = html.replace(/stroke-width="[^"]*"/g, 'stroke-width="' + strokeWidth + '"');
+        html = html.replace(/stroke-width="[^"]*"/g, function () { return 'stroke-width="' + escAttr(strokeWidth) + '"'; });
       }
 
       var extraAttrs = Object.keys(attrs).map(function(k) { return escAttr(k) + '="' + escAttr(attrs[k]) + '"'; }).join(' ');
@@ -602,7 +602,7 @@ writePackageJson(path.join(__dirname, '..'), DIST, {
       import: './cdn/*.js'
     }
   },
-  sideEffects: false,
+  sideEffects: ['./cdn/vezham-icons.js', './umd/vezham-icons.js'],
   files: [
     'index.js',
     'index.d.ts',

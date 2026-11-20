@@ -21,7 +21,10 @@
     "url": "https://github.com/vezham/vx-fe-assets-pkgs",
     "directory": "packages/icons"
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/cdn/vezham-icons.js",
+    "./dist/umd/vezham-icons.js"
+  ],
   "type": "module",
   "exports": {
     ".": {

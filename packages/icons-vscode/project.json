@@ -9,6 +9,10 @@
       "cache": true,
       "inputs": ["default", "iconCatalog"],
       "outputs": ["{projectRoot}/dist"]
+    },
+    "package-vsix": {
+      "dependsOn": ["build"],
+      "outputs": ["{projectRoot}/vezham-icons.vsix"]
     }
   }
 }

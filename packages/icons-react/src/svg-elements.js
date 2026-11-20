@@ -1,6 +1,8 @@
 import { createElement } from 'react'
 import { SaxesParser } from 'saxes'
 
+import { isSecondarySvgLayer } from '../../icons-data/svg-rendering.mjs'
+
 const svgTags = new Set([
   'circle',
   'clipPath',
@@ -122,18 +124,31 @@ export const parseSvgElements = markup => {
 /**
  * @param {SvgChild[]} children
  * @param {string | number} [strokeWidth]
+ * @param {string} [secondaryColor]
+ * @param {boolean} [secondaryLayer]
  * @returns {import('react').ReactNode[]}
  */
-export const renderSvgElements = (children, strokeWidth) =>
+export const renderSvgElements = (
+  children,
+  strokeWidth,
+  secondaryColor,
+  secondaryLayer = false
+) =>
   children.map((child, index) => {
     if (typeof child === 'string') return child
     const props = { ...child.props }
     if (strokeWidth != null && child.props.strokeWidth !== undefined) {
       props.strokeWidth = String(strokeWidth)
     }
+    const tintLayer =
+      secondaryColor != null && (secondaryLayer || isSecondarySvgLayer(props))
+    if (tintLayer && secondaryColor) {
+      if (props.fill === 'currentColor') props.fill = secondaryColor
+      if (props.stroke === 'currentColor') props.stroke = secondaryColor
+    }
     return createElement(
       child.tag,
       { ...props, key: index },
-      renderSvgElements(child.children, strokeWidth)
+      renderSvgElements(child.children, strokeWidth, secondaryColor, tintLayer)
     )
   })

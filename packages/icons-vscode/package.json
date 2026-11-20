@@ -30,14 +30,14 @@
     "url": "https://github.com/vezham/vx-fe-assets-pkgs",
     "directory": "packages/icons-vscode"
   },
-  "main": "./extension.js",
+  "publisher": "Vezham",
+  "main": "./dist/extension.js",
   "files": [
-    "dist",
-    "extension.js",
-    "resources"
+    "dist"
   ],
   "scripts": {
-    "build": "node scripts/build.cjs"
+    "build": "node scripts/build.cjs",
+    "package-vsix": "cd dist && pnpm dlx @vscode/vsce@4.1.1 package --no-dependencies --skip-license --out ../vezham-icons.vsix"
   },
   "contributes": {
     "commands": [
@@ -60,7 +60,7 @@
         {
           "id": "vezham-icons-explorer",
           "title": "Vezham Icons",
-          "icon": "resources/icon.png"
+          "icon": "dist/icon.png"
         }
       ]
     }
@@ -72,7 +72,7 @@
   "engines": {
     "vscode": "^1.80.0"
   },
-  "icon": "resources/icon.png",
+  "icon": "dist/icon.png",
   "badges": [
     {
       "description": "2,700+ Icons",

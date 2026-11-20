@@ -35,7 +35,7 @@ const createIcon = (displayName, iconData) => {
     if (strokeWidth != null) {
       html = html.replace(
         /stroke-width="[^"]*"/g,
-        'stroke-width="' + strokeWidth + '"'
+        () => `stroke-width="${escAttr(strokeWidth)}"`
       )
     }
     return html

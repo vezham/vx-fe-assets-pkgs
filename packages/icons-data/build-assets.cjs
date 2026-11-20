@@ -159,9 +159,23 @@ const writeIconEntries = (
     `// Auto-generated — do not edit\n${types}\n\n${exports}\n`
   )
   console.log('Copying runtime helpers to dist/ …')
+  const files = new Set(runtimeFiles)
+  const sharedImport = '../../icons-data/svg-rendering.mjs'
   for (const name of runtimeFiles) {
-    fs.copyFileSync(path.join(src, name), path.join(dist, name))
+    const code = fs.readFileSync(path.join(src, name), 'utf8')
+    if (code.includes(sharedImport) && !files.has('svg-rendering.js')) {
+      fs.copyFileSync(
+        path.join(__dirname, 'svg-rendering.mjs'),
+        path.join(dist, 'svg-rendering.js')
+      )
+      files.add('svg-rendering.js')
+    }
+    fs.writeFileSync(
+      path.join(dist, name),
+      code.replaceAll(sharedImport, './svg-rendering.js')
+    )
   }
+  return [...files]
 }
 
 const factoryRuntime = ['createIcon.js', 'createIcon.d.ts']
@@ -233,7 +247,7 @@ const writeFactoryIcons = (
   const types = esmTypes
     ? `export { createIcon } from './createIcon.js';\nexport type { ${typeExports} } from './createIcon.js';`
     : "export { createIcon, IconProps, IconWeight, IconComponent } from './createIcon';"
-  writeIconEntries(dist, src, icons, { types, runtimeFiles })
+  return writeIconEntries(dist, src, icons, { types, runtimeFiles })
 }
 
 const writePackageJson = (root, dist, fields) => {
@@ -287,18 +301,18 @@ const distExports = sourceExports =>
   )
 
 const buildFactoryPackage = (root, options) => {
-  const {
-    title,
-    keywords,
-    runtimeFiles = factoryRuntime,
-    absolutePublishPath
-  } = options
+  const { title, keywords, absolutePublishPath } = options
   const dist = path.join(root, 'dist')
   const { icons } = prepareBuild(dist)
   console.log(
     `Generating ${title === 'Vue 3' ? 'Vue' : title} component files in dist/icons/ …`
   )
-  writeFactoryIcons(dist, path.join(root, 'src'), icons, options)
+  const runtimeFiles = writeFactoryIcons(
+    dist,
+    path.join(root, 'src'),
+    icons,
+    options
+  )
   const {
     dependencies,
     peerDependencies,

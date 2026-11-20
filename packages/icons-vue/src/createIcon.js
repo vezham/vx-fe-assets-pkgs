@@ -1,5 +1,7 @@
 import { computed, defineComponent, h } from 'vue'
 
+import { withStrokeWidth } from '../../icons-data/svg-rendering.mjs'
+
 const W_MAP = {
   outline: 'O',
   filled: 'F',
@@ -42,14 +44,8 @@ const createIcon = (displayName, iconData) => {
         /** @type {Record<string, string | undefined>} */
         const data = iconData
         const firstKey = Object.keys(data)[0] || ''
-        let html = data[key] || (firstKey ? data[firstKey] : '') || ''
-        if (props.strokeWidth != null) {
-          html = html.replace(
-            /stroke-width="[^"]*"/g,
-            'stroke-width="' + props.strokeWidth + '"'
-          )
-        }
-        return html
+        const markup = data[key] || (firstKey ? data[firstKey] : '') || ''
+        return withStrokeWidth(markup, props.strokeWidth)
       })
 
       return () => {

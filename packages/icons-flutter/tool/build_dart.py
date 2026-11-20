@@ -17,6 +17,13 @@ ICONS_DIR = os.path.join(ROOT, 'packages', 'icons-data', 'icons')
 OUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib', 'src')
 OUT_PATH = os.path.join(OUT_DIR, 'icons.dart')
 
+DART_RESERVED_MEMBERS = set('''
+    assert await break case catch class const continue default do else enum extends
+    false final finally for if in is new null rethrow return super switch this throw
+    true try var void while with yield
+    hashCode length name names noSuchMethod runtimeType toString
+'''.split())
+
 
 def to_camel(kebab: str) -> str:
     parts = kebab.split('-')
@@ -142,9 +149,15 @@ def generate():
     lines.append('  /// Looks up SVG path data by [iconName], or null if not found.')
     lines.append("  String? operator [](String iconName) => _icons[iconName];")
     lines.append('')
-    for n in all_names:
-        lines.append(f'  /// SVG path data for the "{n}" icon.')
-        lines.append(f"  String get {n} => _icons['{n}'] ?? '';")
+    occupied_members = DART_RESERVED_MEMBERS | set(all_names)
+    for name in all_names:
+        getter = name
+        if getter in DART_RESERVED_MEMBERS:
+            while getter in occupied_members:
+                getter += 'Icon'
+            occupied_members.add(getter)
+        lines.append(f'  /// SVG path data for the "{name}" icon.')
+        lines.append(f"  String get {getter} => _icons['{name}'] ?? '';")
     lines.append('')
     lines.append('  @override')
     lines.append("  String toString() => 'VezhamIconWeight.$_name(${_icons.length} icons)';")

@@ -42,8 +42,9 @@
     "vx/tools/release/index.ts",
     "vx/tools/release/*.test.ts",
     "vx/tools/release/version-actions.cjs",
-    // vx-bot/NOTE: Figma loads compiled code from its manifest. The MCP package launches compiled entry points.
+    // vx-bot/NOTE: Plugin hosts and the MCP launcher load compiled entry points.
     "packages/icons-figma/code.ts",
+    "packages/icons-vscode/extension.js",
     "packages/icons-mcp/bin/run.cjs",
     "packages/icons-mcp/src/cli/index.ts"
   ],

@@ -1,4 +1,6 @@
 <script>
+  import { withStrokeWidth } from '../../icons-data/svg-rendering.mjs';
+
   /** @type {string | number} */
   export let size = 24;
   /** @type {string | undefined} */
@@ -28,11 +30,8 @@
   $: rawHtml = (() => {
     /** @type {Record<string, string>} */
     const data = iconData;
-    let html = data[key] || data[Object.keys(data)[0]] || '';
-    if (strokeWidth != null) {
-      html = html.replace(/stroke-width="[^"]*"/g, 'stroke-width="' + strokeWidth + '"');
-    }
-    return html;
+    const markup = data[key] || data[Object.keys(data)[0]] || '';
+    return withStrokeWidth(markup, strokeWidth);
   })();
 </script>
 
