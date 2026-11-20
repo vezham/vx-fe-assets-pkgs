@@ -92,6 +92,13 @@ const buildWebviewData = () => {
   return { compactData, categoriesList }
 }
 
+// vx-bot/NOTE: Escape HTML-significant characters before embedding JSON in a script element.
+const serializeScriptData = data =>
+  JSON.stringify(data)
+    .replaceAll('<', '\\u003c')
+    .replaceAll('>', '\\u003e')
+    .replaceAll('&', '\\u0026')
+
 const renderWebview = (templatePath, logoPath, mimeType) => {
   const { compactData, categoriesList } = buildWebviewData()
   const logo = fs.existsSync(logoPath)
@@ -102,14 +109,14 @@ const renderWebview = (templatePath, logoPath, mimeType) => {
     .replace(/__VEZHAM_ICONS_LOGO_BASE64__/g, logo)
   const dataScript = `
   <script>
-    window.VEZHAM_ICONS_DATA = ${JSON.stringify(compactData)};
-    window.VEZHAM_ICONS_CATEGORIES = ${JSON.stringify(categoriesList)};
+    window.VEZHAM_ICONS_DATA = ${serializeScriptData(compactData)};
+    window.VEZHAM_ICONS_CATEGORIES = ${serializeScriptData(categoriesList)};
   </script>
   `
   const marker = '<!-- INJECT_ICONS_DATA -->'
   const html = template.includes(marker)
-    ? template.replace(marker, dataScript)
-    : template.replace('</head>', `${dataScript}\n</head>`)
+    ? template.replace(marker, () => dataScript)
+    : template.replace('</head>', () => `${dataScript}\n</head>`)
   return { html, iconCount: Object.keys(compactData).length }
 }
 
