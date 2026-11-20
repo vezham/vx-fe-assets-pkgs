@@ -1,3 +1,13 @@
+## 27.0.2 (2026-11-20)
+
+### 🩹 Fixes
+
+- **repo:** exclude Flutter package ([e159dbc9](https://github.com/vezham/vx-fe-assets-pkgs/commit/e159dbc9))
+
+### ❤️ Thank You
+
+- vx-vigneshwaran
+
 ## 27.0.1 (2026-11-20)
 
 ### 🩹 Fixes
