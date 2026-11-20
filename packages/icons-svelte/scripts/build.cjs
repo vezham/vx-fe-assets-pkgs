@@ -12,9 +12,11 @@ const fs = require('fs')
 const path = require('path')
 const {
   buildPreviewDataUri,
-  collectIcons
+  finishBuild,
+  prepareBuild,
+  writeIconEntries,
+  writePackageJson
 } = require('../../icons-data/build-assets.cjs')
-const { loadIconData } = require('../../icons-data/icon-source.cjs')
 
 // ── paths ──────────────────────────────────────────────────────────────────
 const SRC = path.join(__dirname, '..', 'src')
@@ -29,10 +31,6 @@ function escapeForJS(s) {
     .replace(/\$\{/g, '\\${')
 }
 
-// ── read data ──────────────────────────────────────────────────────────────
-console.log('Reading the SVG catalog …')
-const data = loadIconData()
-
 const RESERVED_EXPORT_NAMES = [
   'icon',
   'createicon',
@@ -42,20 +40,10 @@ const RESERVED_EXPORT_NAMES = [
   'iconoptions',
   'iconfunction'
 ]
-const icons = collectIcons(data, RESERVED_EXPORT_NAMES)
-
-icons.sort((a, b) => a.pascal.localeCompare(b.pascal))
-console.log(`Found ${icons.length} icons`)
-
-// ── clean & prepare src ────────────────────────────────────────────────────
-fs.rmSync(DIST, { recursive: true, force: true })
-fs.mkdirSync(path.join(DIST, 'icons'), { recursive: true })
+const { icons } = prepareBuild(DIST, RESERVED_EXPORT_NAMES)
 
 // ── individual icon files ──────────────────────────────────────────────────
 console.log('Generating Svelte components in dist/icons/ …')
-
-const barrelExports = []
-const dtsExports = []
 
 for (const icon of icons) {
   const wEntries = Object.entries(icon.weights)
@@ -111,27 +99,9 @@ export default class ${icon.pascal} extends SvelteComponent<IconProps, any, any>
     path.join(DIST, 'icons', `${icon.pascal}.svelte.d.ts`),
     iconDTS
   )
-
-  barrelExports.push(
-    `export { default as ${icon.pascal} } from './icons/${icon.pascal}.svelte';`
-  )
-  dtsExports.push(
-    `export { default as ${icon.pascal} } from './icons/${icon.pascal}.svelte';`
-  )
 }
 
-// ── index.js (ESM barrel in src/) ──────────────────────────────────────────
-const indexJS = `// Auto-generated barrel — do not edit
-export { default as Icon } from './Icon.svelte';
-
-${barrelExports.join('\n')}
-`
-
-fs.writeFileSync(path.join(DIST, 'index.js'), indexJS)
-
-// ── index.d.ts (types in src/) ─────────────────────────────────────────────
-const indexDTS = `// Auto-generated — do not edit
-import { SvelteComponent } from 'svelte';
+const types = `import { SvelteComponent } from 'svelte';
 
 export interface IconProps {
   /** Primary icon color. Default: inherits from CSS */
@@ -147,29 +117,17 @@ export interface IconProps {
 }
 
 export declare class Icon extends SvelteComponent<IconProps, any, any> {}
-
-${dtsExports.join('\n')}
 `
-
-fs.writeFileSync(path.join(DIST, 'index.d.ts'), indexDTS)
-
-// ── clean & prepare dist ───────────────────────────────────────────────────
-console.log('Copying runtime helpers to dist/ …')
-// ── copy src files to dist ─────────────────────────────────────────────────
-fs.copyFileSync(path.join(SRC, 'Icon.svelte'), path.join(DIST, 'Icon.svelte'))
-fs.copyFileSync(
-  path.join(SRC, 'Icon.svelte.d.ts'),
-  path.join(DIST, 'Icon.svelte.d.ts')
-)
+writeIconEntries(DIST, SRC, icons, {
+  runtime: "export { default as Icon } from './Icon.svelte';",
+  types: types.trimEnd(),
+  exportName: icon => `default as ${icon.pascal}`,
+  extension: 'svelte',
+  runtimeFiles: ['Icon.svelte', 'Icon.svelte.d.ts']
+})
 
 // ── package.json ───────────────────────────────────────────────────────────
-const srcPkg = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8')
-)
-const pkg = {
-  name: srcPkg.name,
-  version: srcPkg.version,
-  type: 'module',
+writePackageJson(path.join(__dirname, '..'), DIST, {
   description: `Svelte icon components for ${icons.length}+ icons in 4 weights. Tree-shakeable, TypeScript-ready.`,
   main: './index.js',
   module: './index.js',
@@ -221,35 +179,7 @@ const pkg = {
     'filled',
     'tree-shakeable',
     'typescript'
-  ],
-  repository: srcPkg.repository,
-  bugs: srcPkg.bugs,
-  homepage: 'https://vezham.com'
-}
+  ]
+})
 
-fs.writeFileSync(
-  path.join(DIST, 'package.json'),
-  JSON.stringify(pkg, null, 2) + '\n'
-)
-
-// ── icon name map ──────────────────────────────────────────────────────────
-const nameMap = {}
-for (const icon of icons) {
-  nameMap[icon.kebab] = icon.pascal
-}
-fs.writeFileSync(
-  path.join(DIST, 'icon-names.json'),
-  JSON.stringify(nameMap, null, 2)
-)
-
-// ── summary ────────────────────────────────────────────────────────────────
-const totalFiles = icons.length * 2 + 5
-console.log(`\nDone!`)
-console.log(`  Icons:       ${icons.length}`)
-console.log(
-  `  Weights:     outline + filled + duotone-outline + duotone-filled`
-)
-console.log(`  Files:       ${totalFiles}`)
-console.log(`  Output:      ${DIST}`)
-console.log(`\nTo publish:`)
-console.log(`  cd dist && npm publish --access public`)
+finishBuild(DIST, icons, icons.length * 2 + 5)

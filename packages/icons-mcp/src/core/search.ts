@@ -2186,11 +2186,28 @@ export function searchIcons(
   }
 }
 
-export function findIcon(
+export function resolveIcon(
   index: IconIndex,
-  name: string
-): IconEntry | undefined {
-  return index.icons.find(i => i.name === name)
+  name: string,
+  suggestNextStep?: (suggestion: string) => string
+): { icon: IconEntry } | { error: string; suggestion?: string } {
+  const icon = index.icons.find(entry => entry.name === name)
+  if (icon) return { icon }
+  const kebab = name.toLowerCase().replace(/\s+/g, '-')
+  const pascal = kebab.replace(/-/g, '')
+  const suggestion = index.icons.find(
+    entry =>
+      entry.name.toLowerCase() === kebab ||
+      entry.pascal.toLowerCase() === pascal
+  )?.name
+  const missing = `Icon "${name}" not found.`
+  if (!suggestion) {
+    return { error: `${missing} Use search_icons to find the correct name.` }
+  }
+  return {
+    error: `${missing} Did you mean "${suggestion}"?${suggestNextStep?.(suggestion) ?? ''}`,
+    suggestion
+  }
 }
 
 export function listCategories(index: IconIndex): string[] {

@@ -11,11 +11,12 @@
 const fs = require('fs')
 const path = require('path')
 const {
-  buildPreviewDataUri,
-  collectIcons,
-  escapeForJS
+  escapeForJS,
+  finishBuild,
+  prepareBuild,
+  writeFactoryIcons,
+  writePackageJson
 } = require('../../icons-data/build-assets.cjs')
-const { loadIconData } = require('../../icons-data/icon-source.cjs')
 
 // ── paths ──────────────────────────────────────────────────────────────────
 const SRC = path.join(__dirname, '..', 'src')
@@ -29,108 +30,12 @@ function buildStandaloneSvg(inner) {
     .trim()
 }
 
-// ── read data ──────────────────────────────────────────────────────────────
-console.log('Reading the SVG catalog …')
-const data = loadIconData()
-
-const icons = collectIcons(data)
-
-icons.sort((a, b) => a.pascal.localeCompare(b.pascal))
-console.log(`Found ${icons.length} icons`)
-
-// ── clean & prepare dist/icons ──────────────────────────────────────────────
-fs.rmSync(DIST, { recursive: true, force: true })
-fs.mkdirSync(path.join(DIST, 'icons'), { recursive: true })
-
-// ── individual icon files ──────────────────────────────────────────────────
+const { data, icons } = prepareBuild(DIST)
 console.log('Generating vanilla JS component files in dist/icons/ …')
-
-const barrelExports = []
-const dtsExports = []
-
-for (const icon of icons) {
-  const wEntries = Object.entries(icon.weights)
-    .map(([k, v]) => `  ${k}: \`${escapeForJS(v)}\``)
-    .join(',\n')
-
-  const previewUri = buildPreviewDataUri(icon.weights)
-  const kebab = icon.kebab
-
-  // ── icon .js file ──
-  const iconJS = `import createIcon from '../createIcon.js';
-
-/**
- * @name ${icon.pascal}
- * @description Vezham SVG icon function, creates an SVG element.
- * @preview ![${icon.pascal}](${previewUri}) - https://vezham.com/icons/${kebab}
- * @see https://vezham.com/docs - Documentation
- * @param {import('../createIcon').IconOptions} [options] - Icon options
- * @returns {SVGSVGElement} SVG Element
- */
-const ${icon.pascal} = createIcon('${icon.pascal}', {
-${wEntries}
-});
-
-export { ${icon.pascal} };
-export default ${icon.pascal};
-`
-
-  fs.writeFileSync(path.join(DIST, 'icons', `${icon.pascal}.js`), iconJS)
-
-  // ── icon .d.ts file ──
-  const iconDTS = `import type { IconFunction } from '../createIcon.js';
-
-/**
- * @name ${icon.pascal}
- * @description Vezham SVG icon function, creates an SVG element.
- * @preview ![${icon.pascal}](${previewUri}) - https://vezham.com/icons/${kebab}
- * @see https://vezham.com/docs — Documentation
- * @param {import('../createIcon.js').IconOptions} [options] — Icon options
- * @returns {SVGSVGElement} SVG Element
- */
-declare const ${icon.pascal}: IconFunction;
-export { ${icon.pascal} };
-export default ${icon.pascal};
-`
-
-  fs.writeFileSync(path.join(DIST, 'icons', `${icon.pascal}.d.ts`), iconDTS)
-
-  barrelExports.push(
-    `export { ${icon.pascal} } from './icons/${icon.pascal}.js';`
-  )
-  dtsExports.push(`export { ${icon.pascal} } from './icons/${icon.pascal}.js';`)
-}
-
-// ── index.js ───────────────────────────────────────────────────────────────
-const indexJS = `// Auto-generated barrel — do not edit
-export { createIcon } from './createIcon.js';
-
-${barrelExports.join('\n')}
-`
-
-fs.writeFileSync(path.join(DIST, 'index.js'), indexJS)
-
-// ── index.d.ts ─────────────────────────────────────────────────────────────
-const indexDTS = `// Auto-generated — do not edit
-export { createIcon } from './createIcon.js';
-export type { IconOptions, IconWeight, IconFunction } from './createIcon.js';
-
-${dtsExports.join('\n')}
-`
-
-fs.writeFileSync(path.join(DIST, 'index.d.ts'), indexDTS)
-
-// ── clean & prepare dist ───────────────────────────────────────────────────
-console.log('Copying runtime helpers to dist/ …')
-// ── copy src files to dist ─────────────────────────────────────────────────
-fs.copyFileSync(
-  path.join(SRC, 'createIcon.js'),
-  path.join(DIST, 'createIcon.js')
-)
-fs.copyFileSync(
-  path.join(SRC, 'createIcon.d.ts'),
-  path.join(DIST, 'createIcon.d.ts')
-)
+writeFactoryIcons(DIST, SRC, icons, {
+  description: 'Vezham SVG icon function, creates an SVG element.',
+  vanilla: true
+})
 
 // ── UMD bundle ─────────────────────────────────────────────────────────────
 console.log('Generating UMD bundle …')
@@ -663,13 +568,7 @@ for (const icon of icons) {
 console.log(`  Direct SVGs: ${directSvgFiles}`)
 
 // ── package.json ───────────────────────────────────────────────────────────
-const srcPkg = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8')
-)
-const pkg = {
-  name: srcPkg.name,
-  version: srcPkg.version,
-  type: 'module',
+writePackageJson(path.join(__dirname, '..'), DIST, {
   description: `Core vanilla JS icon components for ${icons.length}+ icons in 4 weights. Tree-shakeable, TypeScript-ready.`,
   main: './index.js',
   module: './index.js',
@@ -722,35 +621,7 @@ const pkg = {
     'filled',
     'tree-shakeable',
     'typescript'
-  ],
-  repository: srcPkg.repository,
-  bugs: srcPkg.bugs,
-  homepage: 'https://vezham.com'
-}
+  ]
+})
 
-fs.writeFileSync(
-  path.join(DIST, 'package.json'),
-  JSON.stringify(pkg, null, 2) + '\n'
-)
-
-// ── icon name map ──────────────────────────────────────────────────────────
-const nameMap = {}
-for (const icon of icons) {
-  nameMap[icon.kebab] = icon.pascal
-}
-fs.writeFileSync(
-  path.join(DIST, 'icon-names.json'),
-  JSON.stringify(nameMap, null, 2)
-)
-
-// ── summary ────────────────────────────────────────────────────────────────
-const totalFiles = icons.length * 2 + directSvgFiles + 6
-console.log(`\nDone!`)
-console.log(`  Icons:       ${icons.length}`)
-console.log(
-  `  Weights:     outline + filled + duotone-outline + duotone-filled`
-)
-console.log(`  Files:       ${totalFiles}`)
-console.log(`  Output:      ${DIST}`)
-console.log(`\nTo publish:`)
-console.log(`  cd dist && npm publish --access public`)
+finishBuild(DIST, icons, icons.length * 2 + directSvgFiles + 6)

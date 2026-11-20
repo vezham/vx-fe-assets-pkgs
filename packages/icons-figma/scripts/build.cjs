@@ -2,7 +2,7 @@
 const fs = require('fs')
 const path = require('path')
 const { execFileSync } = require('child_process')
-const { buildWebviewData } = require('../../icons-data/build-assets.cjs')
+const { renderWebview } = require('../../icons-data/build-assets.cjs')
 
 const ROOT = path.join(__dirname, '..')
 const TEMPLATE_HTML_PATH = path.join(ROOT, 'src', 'index.html')
@@ -32,46 +32,13 @@ try {
     { cwd: ROOT, stdio: 'inherit' }
   )
 
-  const { compactData, categoriesList } = buildWebviewData()
-
-  // Load logo as base64
-  let logoBase64 = ''
-  if (fs.existsSync(LOGO_PATH)) {
-    const logoBuffer = fs.readFileSync(LOGO_PATH)
-    logoBase64 = `data:image/webp;base64,${logoBuffer.toString('base64')}`
-  }
-
-  // Read the HTML template
-  let templateContent = fs.readFileSync(TEMPLATE_HTML_PATH, 'utf-8')
-
-  // Replace logo placeholder
-  templateContent = templateContent.replace(
-    /__VEZHAM_ICONS_LOGO_BASE64__/g,
-    logoBase64
+  const { html, iconCount } = renderWebview(
+    TEMPLATE_HTML_PATH,
+    LOGO_PATH,
+    'image/webp'
   )
 
-  // Create inline scripts
-  const inlineScripts = `
-  <script>
-    window.VEZHAM_ICONS_DATA = ${JSON.stringify(compactData)};
-    window.VEZHAM_ICONS_CATEGORIES = ${JSON.stringify(categoriesList)};
-  </script>
-  `
-
-  // Inject before the closing </head> or at placeholder
-  if (templateContent.includes('<!-- INJECT_ICONS_DATA -->')) {
-    templateContent = templateContent.replace(
-      '<!-- INJECT_ICONS_DATA -->',
-      inlineScripts
-    )
-  } else {
-    templateContent = templateContent.replace(
-      '</head>',
-      `${inlineScripts}\n</head>`
-    )
-  }
-
-  fs.writeFileSync(OUTPUT_HTML_PATH, templateContent, 'utf-8')
+  fs.writeFileSync(OUTPUT_HTML_PATH, html, 'utf-8')
 
   for (const file of ['manifest.json', 'icon.png']) {
     const source = path.join(ROOT, file)
@@ -101,9 +68,7 @@ try {
     JSON.stringify(pkg, null, 2) + '\n'
   )
 
-  console.log(
-    `Successfully built ${Object.keys(compactData).length} icons into ${DIST}`
-  )
+  console.log(`Successfully built ${iconCount} icons into ${DIST}`)
 } catch (error) {
   console.error('Error compiling Figma plugin UI:', error)
   process.exit(1)

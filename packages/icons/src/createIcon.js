@@ -24,6 +24,24 @@ const escAttr = v =>
  */
 const createIcon = (displayName, iconData) => {
   /**
+   * @param {import('./createIcon').IconWeight} weight
+   * @param {number | string} [strokeWidth]
+   */
+  const getMarkup = (weight, strokeWidth) => {
+    const key = W_MAP[weight] || 'O'
+    const firstKey = Object.keys(iconData)[0] || ''
+    let html = iconData[key] || (firstKey ? iconData[firstKey] : '') || ''
+
+    if (strokeWidth != null) {
+      html = html.replace(
+        /stroke-width="[^"]*"/g,
+        'stroke-width="' + strokeWidth + '"'
+      )
+    }
+    return html
+  }
+
+  /**
    * Create an SVG element for this icon.
    * @param {import('./createIcon').IconOptions} [options]
    * @returns {SVGSVGElement | null}
@@ -38,18 +56,7 @@ const createIcon = (displayName, iconData) => {
       attrs = {}
     } = options
 
-    const key = W_MAP[weight] || 'O'
-    /** @type {Record<string, string | undefined>} */
-    const data = iconData
-    const firstKey = Object.keys(data)[0] || ''
-    let html = data[key] || (firstKey ? data[firstKey] : '') || ''
-
-    if (strokeWidth != null) {
-      html = html.replace(
-        /stroke-width="[^"]*"/g,
-        'stroke-width="' + strokeWidth + '"'
-      )
-    }
+    const html = getMarkup(weight, strokeWidth)
 
     if (typeof document === 'undefined') {
       if (typeof console !== 'undefined' && console.warn) {
@@ -97,18 +104,7 @@ const createIcon = (displayName, iconData) => {
       attrs = {}
     } = options
 
-    const key = W_MAP[weight] || 'O'
-    /** @type {Record<string, string | undefined>} */
-    const data = iconData
-    const firstKey = Object.keys(data)[0] || ''
-    let html = data[key] || (firstKey ? data[firstKey] : '') || ''
-
-    if (strokeWidth != null) {
-      html = html.replace(
-        /stroke-width="[^"]*"/g,
-        'stroke-width="' + strokeWidth + '"'
-      )
-    }
+    const html = getMarkup(weight, strokeWidth)
 
     const extraAttrs = Object.entries(attrs)
       .map(([k, v]) => `${escAttr(k)}="${escAttr(v)}"`)

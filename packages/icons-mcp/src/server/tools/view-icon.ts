@@ -1,29 +1,12 @@
 import { buildSvgMarkup } from '../../core/codegen.js'
 import { loadIndex } from '../../core/load-index.js'
-import { findIcon } from '../../core/search.js'
+import { resolveIcon } from '../../core/search.js'
 import type { IconWeight } from '../../core/types.js'
 
 export function handleViewIcon(args: { name: string; weight: IconWeight }) {
-  const index = loadIndex()
-  const icon = findIcon(index, args.name)
-  if (!icon) {
-    // Try a soft match in case casing or dashes differ
-    const lower = args.name.toLowerCase().replace(/\s+/g, '-')
-    const match = index.icons.find(
-      i =>
-        i.name.toLowerCase() === lower ||
-        i.pascal.toLowerCase() === lower.replace(/-/g, '')
-    )
-    if (match) {
-      return {
-        error: `Icon "${args.name}" not found. Did you mean "${match.name}"?`,
-        suggestion: match.name
-      }
-    }
-    return {
-      error: `Icon "${args.name}" not found. Use search_icons to find the correct name.`
-    }
-  }
+  const resolved = resolveIcon(loadIndex(), args.name)
+  if ('error' in resolved) return resolved
+  const { icon } = resolved
 
   const svg = buildSvgMarkup(icon, args.weight)
   if (typeof svg !== 'string') {
