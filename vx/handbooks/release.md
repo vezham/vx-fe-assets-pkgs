@@ -128,6 +128,9 @@ a separate `ReleaseClient` containing only eligible public projects, with
 `ignoreNxJsonConfig: true` (the second constructor argument). Filtering the
 workspace's fixed group directly is rejected by Nx, even during a dry run.
 
+The eight npm icon packages follow the fixed workspace version. The Flutter
+package uses its Dart manifest and stays outside the npm release.
+
 Release builds use `@vx:@vx-ci/build`, with up to four build tasks running at once.
 
 Use the workspace runner for complete releases, including metadata synchronization.

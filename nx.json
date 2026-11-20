@@ -289,7 +289,7 @@
     }
   },
   "release": {
-    "projects": ["*", "!@vx/fe-kit", "!tag:scope:icons"],
+    "projects": ["*", "!@vx/fe-kit", "!icons-flutter"],
     "version": {
       "preVersionCommand": "pnpm nx run @vx:@vx-ci/build",
       "conventionalCommits": true,
