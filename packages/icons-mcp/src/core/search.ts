@@ -2022,7 +2022,7 @@ function tokenize(text: string): string[] {
   return normalize(text).split(' ').filter(Boolean)
 }
 
-export function isSentenceQuery(query: string): boolean {
+function isSentenceQuery(query: string): boolean {
   const trimmed = query.trim()
   if (!trimmed) return true
   if (SENTENCE_MARKERS.test(trimmed)) return true

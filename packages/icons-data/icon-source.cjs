@@ -11,8 +11,6 @@ const WEIGHT_FILES = {
   'duotone-filled': 'duotone-filled'
 }
 
-const DUOTONE_WEIGHTS = ['duotone-outline', 'duotone-filled']
-
 function readJson(filePath, fallback) {
   if (!fs.existsSync(filePath)) return fallback
   return JSON.parse(fs.readFileSync(filePath, 'utf-8'))
@@ -132,38 +130,4 @@ function loadIconData(options = {}) {
   return data
 }
 
-function loadDuotoneIcons(options = {}) {
-  const data = loadIconData(options)
-  const icons = {}
-
-  for (const [category, categoryData] of Object.entries(
-    data.categories || {}
-  )) {
-    for (const [name, icon] of Object.entries(categoryData.icons || {})) {
-      const weights = {}
-      for (const weight of DUOTONE_WEIGHTS) {
-        const weightData = icon.weights && icon.weights[weight]
-        if (weightData && weightData.code) {
-          weights[weight] = weightData
-        }
-      }
-      if (Object.keys(weights).length === 0) continue
-      icons[name] = {
-        weights,
-        category,
-        description: icon.description || []
-      }
-    }
-  }
-
-  return { icons }
-}
-
-module.exports = {
-  ICONS_DIR,
-  WEIGHT_FILES,
-  loadDuotoneIcons,
-  loadIconData,
-  minifySvg,
-  normalizeSvgColors
-}
+module.exports = { loadIconData, normalizeSvgColors }

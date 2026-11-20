@@ -1,6 +1,8 @@
 'use client'
 import { createElement, forwardRef } from 'react'
 
+import { parseSvgElements, renderSvgElements } from './svg-elements.js'
+
 const W_MAP = {
   outline: 'O',
   filled: 'F',
@@ -14,6 +16,8 @@ const W_MAP = {
  * @param {Record<string, string | undefined>} iconData     { O?: string, F?: string, DO?: string, DF?: string }
  */
 const createIcon = (displayName, iconData) => {
+  /** @type {Map<string, ReturnType<typeof parseSvgElements>>} */
+  const parsedIcons = new Map()
   const Icon = forwardRef(
     /**
      * @param {import('./createIcon').IconProps} props
@@ -32,28 +36,30 @@ const createIcon = (displayName, iconData) => {
       ref
     ) => {
       delete rest.secondaryColor
+      delete rest.dangerouslySetInnerHTML
       const key = W_MAP[weight] || 'O'
-      let html = iconData[key] || iconData[Object.keys(iconData)[0]] || ''
-
-      if (strokeWidth != null) {
-        html = html.replace(
-          /stroke-width="[^"]*"/g,
-          'stroke-width="' + strokeWidth + '"'
-        )
+      const markup = iconData[key] || iconData[Object.keys(iconData)[0]] || ''
+      let elements = parsedIcons.get(markup)
+      if (!elements) {
+        elements = parseSvgElements(markup)
+        parsedIcons.set(markup, elements)
       }
 
-      return createElement('svg', {
-        ref,
-        xmlns: 'http://www.w3.org/2000/svg',
-        width: size,
-        height: size,
-        viewBox: '0 0 24 24',
-        fill: 'none',
-        className: className ? 'vezham ' + className : 'vezham',
-        style: color != null ? { color, ...style } : style,
-        ...rest,
-        dangerouslySetInnerHTML: { __html: html }
-      })
+      return createElement(
+        'svg',
+        {
+          ref,
+          xmlns: 'http://www.w3.org/2000/svg',
+          width: size,
+          height: size,
+          viewBox: '0 0 24 24',
+          fill: 'none',
+          className: className ? 'vezham ' + className : 'vezham',
+          style: color != null ? { color, ...style } : style,
+          ...rest
+        },
+        renderSvgElements(elements, strokeWidth)
+      )
     }
   )
 

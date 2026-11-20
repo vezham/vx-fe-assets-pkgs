@@ -11,59 +11,15 @@
 const fs = require('fs')
 const path = require('path')
 const {
-  loadIconData,
-  normalizeSvgColors
-} = require('../../icons-data/icon-source.cjs')
+  buildPreviewDataUri,
+  collectIcons,
+  escapeForJS
+} = require('../../icons-data/build-assets.cjs')
+const { loadIconData } = require('../../icons-data/icon-source.cjs')
 
 // ── paths ──────────────────────────────────────────────────────────────────
 const SRC = path.join(__dirname, '..', 'src')
 const DIST = path.join(__dirname, '..', 'dist')
-
-// ── weight short keys ──────────────────────────────────────────────────────
-const W_KEY = {
-  outline: 'O',
-  filled: 'F',
-  'duotone-outline': 'DO',
-  'duotone-filled': 'DF'
-}
-
-// ── helpers ────────────────────────────────────────────────────────────────
-function toPascalCase(str) {
-  return str
-    .split('-')
-    .map(s => s.charAt(0).toUpperCase() + s.slice(1))
-    .join('')
-}
-
-function stripSvgWrapper(code) {
-  if (!code) return ''
-  return code
-    .replace(/^<svg[^>]*>/, '')
-    .replace(/<\/svg>\s*$/, '')
-    .trim()
-}
-
-// Normalize legacy hardcoded icon colors so user color options work correctly.
-function rewriteColors(svg) {
-  return normalizeSvgColors(svg)
-}
-
-function escapeForJS(s) {
-  return s.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${')
-}
-
-/**
- * Build a base64 data URI for an inline SVG preview (shown in IDE hover).
- */
-function buildPreviewDataUri(weights) {
-  const inner = weights.O || weights.F || weights.DO || weights.DF || ''
-  if (!inner) return ''
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">${inner}</svg>`
-      .replace(/currentColor/g, '#e4e4e7')
-      .replace(/__RI_SECONDARY__/g, '#9ca3af')
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`
-}
 
 function buildStandaloneSvg(inner) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">${inner}</svg>`
@@ -77,50 +33,7 @@ function buildStandaloneSvg(inner) {
 console.log('Reading the SVG catalog …')
 const data = loadIconData()
 
-// ── collect icons ──────────────────────────────────────────────────────────
-const icons = []
-const pascalLowerSet = new Set()
-
-for (const [catKey, catData] of Object.entries(data.categories || {})) {
-  for (const [iconKey, icon] of Object.entries(catData.icons || {})) {
-    let pascal = toPascalCase(iconKey)
-
-    if (pascalLowerSet.has(pascal.toLowerCase())) {
-      pascal += toPascalCase(catKey)
-    }
-    pascalLowerSet.add(pascal.toLowerCase())
-
-    const weights = {}
-    const directWeights = {}
-    for (const [wName, wData] of Object.entries(icon.weights || {})) {
-      const short = W_KEY[wName]
-      if (wData.code) {
-        const code = rewriteColors(stripSvgWrapper(wData.code))
-        if (short) weights[short] = code
-        if (wName === 'outline') directWeights.O = code
-        if (wName === 'filled') directWeights.F = code
-        if (wName === 'duotone-outline') directWeights.DO = code
-        if (wName === 'duotone-filled') directWeights.DF = code
-      }
-    }
-
-    if (
-      Object.keys(weights).length > 0 ||
-      Object.keys(directWeights).length > 0
-    ) {
-      icons.push({
-        kebab: iconKey,
-        pascal,
-        category: catKey,
-        weights,
-        directWeights,
-        tags: icon.description || [],
-        // contributor is optional — only set when the icon was community-contributed
-        contributor: icon.contributor || null
-      })
-    }
-  }
-}
+const icons = collectIcons(data)
 
 icons.sort((a, b) => a.pascal.localeCompare(b.pascal))
 console.log(`Found ${icons.length} icons`)
@@ -730,24 +643,21 @@ function writeDirectSvg(relativePath, inner) {
 
 for (const icon of icons) {
   const outline =
-    icon.directWeights.O ||
-    icon.directWeights.F ||
-    icon.directWeights.DO ||
-    icon.directWeights.DF
+    icon.weights.O || icon.weights.F || icon.weights.DO || icon.weights.DF
   if (outline) {
     writeDirectSvg(`${icon.kebab}.svg`, outline)
   }
 
-  if (icon.directWeights.F) {
-    writeDirectSvg(`${icon.kebab}-filled.svg`, icon.directWeights.F)
+  if (icon.weights.F) {
+    writeDirectSvg(`${icon.kebab}-filled.svg`, icon.weights.F)
   }
 
-  if (icon.directWeights.DO) {
-    writeDirectSvg(`${icon.kebab}-duotone-outline.svg`, icon.directWeights.DO)
+  if (icon.weights.DO) {
+    writeDirectSvg(`${icon.kebab}-duotone-outline.svg`, icon.weights.DO)
   }
 
-  if (icon.directWeights.DF) {
-    writeDirectSvg(`${icon.kebab}-duotone-filled.svg`, icon.directWeights.DF)
+  if (icon.weights.DF) {
+    writeDirectSvg(`${icon.kebab}-duotone-filled.svg`, icon.weights.DF)
   }
 }
 console.log(`  Direct SVGs: ${directSvgFiles}`)

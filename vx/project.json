@@ -45,7 +45,7 @@
       "cache": false
     },
     "@vx-ws/audit:fallow": {
-      "command": "pnpm exec fallow",
+      "command": "node vx/tools/audit/index.mjs --fallow-only",
       "cache": false
     },
     "@vx-ws/audit:fallow-fix-preview": {

@@ -47,6 +47,9 @@
   "scripts": {
     "build": "node scripts/build.cjs"
   },
+  "dependencies": {
+    "saxes": "6.0.0"
+  },
   "peerDependencies": {
     "react": ">=16.8.0"
   }

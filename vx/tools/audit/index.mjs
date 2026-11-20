@@ -6,7 +6,12 @@ import { fileURLToPath } from 'node:url'
 import { auditPassed } from './gate.mjs'
 
 const root = fileURLToPath(new URL('../../../', import.meta.url))
-const output = path.join(root, 'test-output/audit')
+const fallowOnly = process.argv[2] === '--fallow-only'
+const output = path.join(
+  root,
+  'test-output/audit',
+  fallowOnly ? 'fallow-only' : ''
+)
 const minimumScore = 90
 mkdirSync(output, { recursive: true })
 
@@ -33,7 +38,7 @@ const audits = [
   }
 ]
 const results = []
-for (const audit of audits) {
+for (const audit of fallowOnly ? audits.slice(0, 1) : audits) {
   const report = path.join(output, `${audit.name}.json`)
   // vx-bot/NOTE: Clear prior output so a failed run cannot publish a stale report.
   writeFileSync(report, '')
@@ -65,7 +70,10 @@ for (const audit of audits) {
           ? (data.health?.summary?.average_maintainability ?? null)
           : (data.summary?.score ?? null),
       ...(audit.name === 'fallow'
-        ? { healthScore: data.health?.health_score?.score ?? null }
+        ? {
+            healthScore: data.health?.health_score?.score ?? null,
+            cloneGroups: data.dupes?.clone_groups?.length ?? 0
+          }
         : {}),
       summary: data.summary ?? data.check?.summary
     })
@@ -102,5 +110,10 @@ for (const result of results) {
       `${result.tool}: ${result.scoreMetric} ${result.score ?? 'unavailable'} does not meet the required ${minimumScore}/100 score gate`
     )
     process.exitCode = 1
+  }
+  if (fallowOnly) {
+    console.log(
+      `Fallow findings: ${result.summary?.total_issues ?? 0} dead-code issues, ${result.cloneGroups} clone groups`
+    )
   }
 }

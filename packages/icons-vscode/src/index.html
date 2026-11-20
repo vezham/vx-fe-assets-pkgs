@@ -955,6 +955,8 @@
 
         loadSavedState()
 
+        window.addEventListener('click', closeMenuOnOutsideClick)
+
         // 1. Generate category pills in horizontal scroller
         window.VEZHAM_ICONS_CATEGORIES.sort((a, b) =>
           a.name.localeCompare(b.name)
@@ -1224,7 +1226,7 @@
         updateMenuButton(isOpen)
       }
 
-      window.addEventListener('click', e => {
+      function closeMenuOnOutsideClick(e) {
         const toggleBtn = document.getElementById('menu-toggle-btn')
         if (
           dropdownMenu.classList.contains('show') &&
@@ -1235,7 +1237,7 @@
           dropdownMenu.classList.remove('show')
           updateMenuButton(false)
         }
-      })
+      }
 
       function changePreviewSize(diff) {
         const nextSize = Math.max(16, Math.min(64, currentPreviewSize + diff))
@@ -1303,8 +1305,9 @@
         clearTimeout(toastTimeout)
       }
 
-      // Run init
-      window.onload = init
+      if (typeof window !== 'undefined') {
+        window.addEventListener('load', init, { once: true })
+      }
     </script>
   </body>
 </html>

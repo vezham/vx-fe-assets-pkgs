@@ -6,6 +6,10 @@ QA runs this in parallel with the other checks. Both tools must complete with
 the configured `minimumScore`; lower or unavailable scores fail the audit job.
 Both tools run even if one fails.
 
+Run `pnpm nx run @vx:@vx-ws/audit:fallow` for the Fallow score gate alone.
+It uses the same maintainability minimum and writes the findings to
+`test-output/audit/fallow-only/`.
+
 The Fallow gate uses `averageMaintainability`, recorded explicitly as
 `scoreMetric` in `summary.json`. The separate overall `healthScore` is included
 in reports and logs for information; it is not the gated score. Overall health

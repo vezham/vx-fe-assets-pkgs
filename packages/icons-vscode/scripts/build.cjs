@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs')
 const path = require('path')
-const { loadIconData } = require('../../icons-data/icon-source.cjs')
+const { buildWebviewData } = require('../../icons-data/build-assets.cjs')
 
 const TEMPLATE_HTML_PATH = path.join(__dirname, '..', 'src', 'index.html')
 const OUTPUT_HTML_PATH = path.join(__dirname, '..', 'dist', 'index.html')
@@ -16,38 +16,7 @@ try {
     throw new Error(`Template HTML file not found at ${TEMPLATE_HTML_PATH}`)
   }
 
-  const rawData = loadIconData()
-  const compactData = {}
-  const categoriesList = []
-
-  if (rawData.categories) {
-    for (const [catKey, catData] of Object.entries(rawData.categories)) {
-      categoriesList.push({
-        id: catKey,
-        name: catData.name || catKey.charAt(0).toUpperCase() + catKey.slice(1)
-      })
-
-      for (const [iconKey, icon] of Object.entries(catData.icons || {})) {
-        const weights = {}
-        for (const [weightName, weightData] of Object.entries(
-          icon.weights || {}
-        )) {
-          if (weightData && weightData.code) {
-            weights[weightName] = weightData.code
-          }
-        }
-
-        // Only include icon if it has at least one weight
-        if (Object.keys(weights).length > 0) {
-          compactData[iconKey] = {
-            category: catKey,
-            weights: weights,
-            description: icon.description || []
-          }
-        }
-      }
-    }
-  }
+  const { compactData, categoriesList } = buildWebviewData()
 
   // Load logo as base64
   let logoBase64 = ''

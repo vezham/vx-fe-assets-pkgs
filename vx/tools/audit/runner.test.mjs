@@ -14,7 +14,7 @@ import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 const directory = path.dirname(fileURLToPath(import.meta.url))
-const runAudit = (t, tools) => {
+const runAudit = (t, tools, args = []) => {
   const root = mkdtempSync(path.join(tmpdir(), 'vx-audit-runner-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))
   const scripts = path.join(root, 'vx/tools/audit')
@@ -53,7 +53,7 @@ const runAudit = (t, tools) => {
   )
   const result = spawnSync(
     process.execPath,
-    [path.join(scripts, 'index.mjs')],
+    [path.join(scripts, 'index.mjs'), ...args],
     {
       cwd: root,
       env: { ...process.env, PATH: `${bin}:${process.env.PATH}` },
@@ -63,15 +63,37 @@ const runAudit = (t, tools) => {
   assert.equal(result.error, undefined)
   assert.deepEqual(
     readFileSync(path.join(root, 'calls.txt'), 'utf8').trim().split('\n'),
-    ['fallow', 'react-doctor']
+    args.includes('--fallow-only') ? ['fallow'] : ['fallow', 'react-doctor']
   )
   return {
     result,
     reports: JSON.parse(
-      readFileSync(path.join(root, 'test-output/audit/summary.json'), 'utf8')
+      readFileSync(
+        path.join(
+          root,
+          'test-output/audit',
+          args.includes('--fallow-only') ? 'fallow-only' : '',
+          'summary.json'
+        ),
+        'utf8'
+      )
     )
   }
 }
+
+test('standalone Fallow uses the QA score gate when Fallow reports findings', t => {
+  const { result, reports } = runAudit(
+    t,
+    {
+      fallow: { score: 90, exitCode: 1 }
+    },
+    ['--fallow-only']
+  )
+  assert.equal(result.status, 0, result.stderr)
+  assert.equal(reports.length, 1)
+  assert.equal(reports[0].passed, true)
+  assert.match(result.stdout, /3 dead-code issues/)
+})
 
 test('runner records the threshold and passes both tools at the required score', t => {
   const { result, reports } = runAudit(t, {

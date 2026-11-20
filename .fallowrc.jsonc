@@ -41,7 +41,11 @@
     "vx/tools/eslint/tests/*.test.mjs",
     "vx/tools/release/index.ts",
     "vx/tools/release/*.test.ts",
-    "vx/tools/release/version-actions.cjs"
+    "vx/tools/release/version-actions.cjs",
+    // vx-bot/NOTE: Figma loads compiled code from its manifest. The MCP package launches compiled entry points.
+    "packages/icons-figma/code.ts",
+    "packages/icons-mcp/bin/run.cjs",
+    "packages/icons-mcp/src/cli/index.ts"
   ],
   "framework": [
     {
@@ -69,6 +73,8 @@
     }
   ],
   "ignoreDependencies": [
+    // vx-bot/NOTE: The Figma sandbox globals are loaded through the plugin tsconfig's typeRoots.
+    "@figma/plugin-typings",
     // vx-bot/NOTE: Root-supplied framework integrations remain available for generated Next and TanStack apps.
     "@tailwindcss/postcss",
     "@tanstack/react-router",

@@ -2,7 +2,7 @@
 const fs = require('fs')
 const path = require('path')
 const { execFileSync } = require('child_process')
-const { loadIconData } = require('../../icons-data/icon-source.cjs')
+const { buildWebviewData } = require('../../icons-data/build-assets.cjs')
 
 const ROOT = path.join(__dirname, '..')
 const TEMPLATE_HTML_PATH = path.join(ROOT, 'src', 'index.html')
@@ -32,38 +32,7 @@ try {
     { cwd: ROOT, stdio: 'inherit' }
   )
 
-  const rawData = loadIconData()
-  const compactData = {}
-  const categoriesList = []
-
-  if (rawData.categories) {
-    for (const [catKey, catData] of Object.entries(rawData.categories)) {
-      categoriesList.push({
-        id: catKey,
-        name: catData.name || catKey.charAt(0).toUpperCase() + catKey.slice(1)
-      })
-
-      for (const [iconKey, icon] of Object.entries(catData.icons || {})) {
-        const weights = {}
-        for (const [weightName, weightData] of Object.entries(
-          icon.weights || {}
-        )) {
-          if (weightData && weightData.code) {
-            weights[weightName] = weightData.code
-          }
-        }
-
-        // Only include icon if it has at least one weight
-        if (Object.keys(weights).length > 0) {
-          compactData[iconKey] = {
-            category: catKey,
-            weights: weights,
-            description: icon.description || []
-          }
-        }
-      }
-    }
-  }
+  const { compactData, categoriesList } = buildWebviewData()
 
   // Load logo as base64
   let logoBase64 = ''
