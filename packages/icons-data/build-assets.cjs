@@ -2,6 +2,8 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { loadIconData, normalizeSvgColors } = require('./icon-source.cjs')
 
+const iconDocsUrl = 'https://oss.vezham.com/docs/assets'
+
 const shortWeights = {
   outline: 'O',
   filled: 'F',
@@ -198,12 +200,13 @@ const writeFactoryIcons = (
   const declarationImport = esmTypes ? '../createIcon.js' : '../createIcon'
   for (const { pascal, kebab, weights } of icons) {
     const preview = buildPreviewDataUri(weights, secondaryColor)
+    const iconUrl = `${iconDocsUrl}/icons/${encodeURIComponent(kebab)}`
     const help = [
       '/**',
       ...(!vanilla ? [' * @component'] : []),
       ` * @name ${pascal}`,
       ` * @description ${description}`,
-      ` * @preview ![${pascal}](${preview}) - https://vezham.com/icons/${kebab}`
+      ` * @preview ![${pascal}](${preview}) - ${iconUrl}`
     ]
     const docs = declaration => {
       const vanillaJs = vanilla && !declaration
@@ -211,7 +214,7 @@ const writeFactoryIcons = (
       const optionsImport = vanillaJs ? '../createIcon' : declarationImport
       return [
         ...help,
-        ` * @see https://vezham.com/docs ${dash} Documentation`,
+        ` * @see ${iconDocsUrl}/guides ${dash} Documentation`,
         ...(vanilla
           ? [
               ` * @param {import('${optionsImport}').IconOptions} [options] ${dash} Icon options`,
@@ -344,6 +347,7 @@ module.exports = {
   distExports,
   escapeForJS,
   finishBuild,
+  iconDocsUrl,
   prepareBuild,
   renderWebview,
   writeFactoryIcons,

@@ -31,6 +31,7 @@ try {
     path.join(DIST, 'extension.js')
   )
   fs.copyFileSync(LOGO_PATH, path.join(DIST, 'icon.png'))
+  fs.copyFileSync(path.join(ROOT, 'README.md'), path.join(DIST, 'README.md'))
 
   const manifest = JSON.parse(
     fs.readFileSync(path.join(ROOT, 'package.json'), 'utf-8')
@@ -39,7 +40,7 @@ try {
   manifest.main = './extension.js'
   manifest.icon = 'icon.png'
   manifest.contributes.viewsContainers.activitybar[0].icon = manifest.icon
-  manifest.files = ['extension.js', 'icon.png', 'index.html']
+  manifest.files = ['extension.js', 'icon.png', 'index.html', 'README.md']
   delete manifest.scripts
   delete manifest.devDependencies
   fs.writeFileSync(

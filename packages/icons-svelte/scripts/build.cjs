@@ -14,6 +14,7 @@ const {
   buildPreviewDataUri,
   distExports,
   finishBuild,
+  iconDocsUrl,
   prepareBuild,
   writeIconEntries,
   writePackageJson
@@ -53,7 +54,7 @@ for (const icon of icons) {
     .join(',\n')
 
   const previewUri = buildPreviewDataUri(icon.weights, false)
-  const kebab = icon.kebab
+  const iconUrl = `${iconDocsUrl}/icons/${encodeURIComponent(icon.kebab)}`
 
   // ── icon .svelte file ──
   const iconSvelte = `<script>
@@ -72,8 +73,8 @@ ${wEntries}
   @component
   @name ${icon.pascal}
   @description Vezham Svelte icon component, renders an SVG Element.
-  @preview ![${icon.pascal}](${previewUri}) - https://vezham.com/icons/${kebab}
-  @see https://vezham.com/docs — Documentation
+  @preview ![${icon.pascal}](${previewUri}) - ${iconUrl}
+  @see ${iconDocsUrl}/guides — Documentation
 -->
 <Icon {size} {color} {weight} {strokeWidth} {iconData} {...$$restProps} />
 `
@@ -91,8 +92,8 @@ import type { IconProps } from '../index.js';
  * @component
  * @name ${icon.pascal}
  * @description Vezham Svelte icon component, renders an SVG Element.
- * @preview ![${icon.pascal}](${previewUri}) - https://vezham.com/icons/${kebab}
- * @see https://vezham.com/docs — Documentation
+ * @preview ![${icon.pascal}](${previewUri}) - ${iconUrl}
+ * @see ${iconDocsUrl}/guides — Documentation
  */
 export default class ${icon.pascal} extends SvelteComponent<IconProps, any, any> {}
 `
