@@ -1,3 +1,13 @@
+## 27.0.4 (2026-11-21)
+
+### 📖 Documentation
+
+- **icons:** add package docs and bundle README ([88a6705a](https://github.com/vezham/vx-fe-assets-pkgs/commit/88a6705a))
+
+### ❤️ Thank You
+
+- vx-vigneshwaran
+
 ## 27.0.3 (2026-11-20)
 
 ### 🩹 Fixes

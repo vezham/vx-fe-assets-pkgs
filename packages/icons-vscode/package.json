@@ -1,7 +1,7 @@
 {
   "name": "@vezham/icons-vscode",
   "displayName": "Vezham Icons — SVG Icon Library",
-  "version": "27.0.3",
+  "version": "27.0.4",
   "description": "Browse and insert handcrafted Vezham SVG icons directly into your HTML, React, Vue, Svelte, or vanilla JS code. Outline, filled, duotone-outline, and duotone-filled styles available.",
   "categories": [
     "Other",
